@@ -1,0 +1,3 @@
+/home/srk/Git_Program/Automobile_Sales_Information_Management_System/build/CMakeFiles/auto_sales.dir
+/home/srk/Git_Program/Automobile_Sales_Information_Management_System/build/CMakeFiles/edit_cache.dir
+/home/srk/Git_Program/Automobile_Sales_Information_Management_System/build/CMakeFiles/rebuild_cache.dir
