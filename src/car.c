@@ -1,4 +1,7 @@
 #include "car.h"
+#include "utils.h"
+#include <stdio.h>
+#include <time.h>
 
 Car *car_head = NULL;
 
@@ -20,10 +23,9 @@ Car *car_head = NULL;
  * 遍历链表，strcmp 比较 id 字段
  * 返回值：找到返回节点指针，未找到返回 NULL
  */
-Car *car_find(const char *id)
-{
-    /* TODO: 遍历链表比较 id，返回匹配节点或 NULL */
-    return NULL;
+Car *car_find(const char *id) {
+  /* TODO: 遍历链表比较 id，返回匹配节点或 NULL */
+  return NULL;
 }
 
 /* ---- 增删改查 ---- */
@@ -39,10 +41,7 @@ Car *car_find(const char *id)
  *   5. 头插法插入链表
  *   6. 提示成功，pause_screen
  */
-void car_add(void)
-{
-    /* TODO: 实现添加轿车 */
-}
+void car_add(void) { /* TODO: 实现添加轿车 */ }
 
 /**
  * car_delete - 删除轿车记录
@@ -54,10 +53,7 @@ void car_add(void)
  *   4. 确认后从链表摘除：prev->next = p->next（头节点特殊处理）
  *   5. free 释放内存
  */
-void car_delete(void)
-{
-    /* TODO: 实现删除轿车 */
-}
+void car_delete(void) { /* TODO: 实现删除轿车 */ }
 
 /**
  * car_modify - 修改轿车记录
@@ -69,10 +65,7 @@ void car_delete(void)
  *   4. 逐字段提示输入新值，直接回车保留原值
  *   5. 可用 safe_gets + strlen 判断是否输入了新值
  */
-void car_modify(void)
-{
-    /* TODO: 实现修改轿车 */
-}
+void car_modify(void) { /* TODO: 实现修改轿车 */ }
 
 /**
  * car_query - 查询轿车记录（子菜单）
@@ -84,10 +77,7 @@ void car_modify(void)
  *
  * 打印表头后逐条输出匹配记录，无结果提示"未找到"
  */
-void car_query(void)
-{
-    /* TODO: 实现查询轿车（子菜单选择查询方式） */
-}
+void car_query(void) { /* TODO: 实现查询轿车（子菜单选择查询方式） */ }
 
 /**
  * car_list_all - 显示全部轿车记录
@@ -98,10 +88,7 @@ void car_query(void)
  *   3. 遍历链表逐条打印
  *   4. 链表为空则提示"暂无数据"
  */
-void car_list_all(void)
-{
-    /* TODO: 实现遍历打印全部轿车 */
-}
+void car_list_all(void) { /* TODO: 实现遍历打印全部轿车 */ }
 
 /* ---- 菜单 ---- */
 
@@ -118,12 +105,7 @@ void car_list_all(void)
  *
  * 循环显示菜单，read_int 读取选择，switch 分发
  */
-void car_menu(void)
-{
-    /* TODO: 实现菜单循环 */
-}
-
-/* ---- 文件读写 ---- */
+void car_menu(void) { /* TODO: 实现菜单循环 */ }
 
 /**
  * car_save - 保存轿车数据到文件
@@ -132,9 +114,11 @@ void car_menu(void)
  * 遍历链表，fwrite 每个节点（sizeof(Car)）
  * 注意：next 指针也会被写入，加载时需要重建
  */
-void car_save(void)
-{
-    /* TODO: 实现文件保存 */
+void car_save(void) {
+  FILE *fp = fopen(DATA_DIR "cars.dat", "wb");
+  for (Car *p = car_head; p != NULL; p = p->next)
+    fwrite(p, sizeof(Car), 1, fp);
+  fclose(fp);
 }
 
 /**
@@ -143,7 +127,13 @@ void car_save(void)
  * 打开 data/cars.dat（rb 模式），文件不存在则跳过
  * 循环 fread 到临时变量，malloc 新节点，头插法插入链表
  */
-void car_load(void)
-{
-    /* TODO: 实现文件加载 */
+void car_load(void) {
+  FILE *fp = fopen(DATA_DIR "cars.dat", "rb");
+  if (fp == NULL)
+    return;
+  Car tmp;
+  while (fread(&tmp, sizeof(Car), 1, fp) == 1) {
+    Car *new_node = calloc(1, sizeof(Car));
+  }
+  fclose(fp);
 }
