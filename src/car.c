@@ -14,17 +14,14 @@ Car *car_head = NULL;
  * 文件存储：data/cars.dat（二进制，按 sizeof(Car) 逐条写入）
  */
 
-/* ---- 查询接口 ---- */
-
-/**
- * car_find - 按编号精确查找轿车
- * @id: 要查找的轿车编号
- *
- * 遍历链表，strcmp 比较 id 字段
- * 返回值：找到返回节点指针，未找到返回 NULL
- */
 Car *car_find(const char *id) {
-  /* TODO: 遍历链表比较 id，返回匹配节点或 NULL */
+  Car *p = car_head;
+  while (p != NULL) {
+    if (strcmp(p->id, id) == 0) {
+      return p;
+    }
+    p = p->next;
+  }
   return NULL;
 }
 
@@ -77,18 +74,43 @@ void car_modify(void) { /* TODO: 实现修改轿车 */ }
  *
  * 打印表头后逐条输出匹配记录，无结果提示"未找到"
  */
-void car_query(void) { /* TODO: 实现查询轿车（子菜单选择查询方式） */ }
+void car_query(void) {
+  char id[MAX_STR];
+  printf("请输入查询车辆id:");
+  safe_gets(id, sizeof(id));
+  Car *p = car_find(id);
+  if (p == NULL) {
+    printf("\n未查询到此车辆信息\n");
+    pause_screen();
+    return;
+  }
+  printf("已查询到如下信息:\n");
 
-/**
- * car_list_all - 显示全部轿车记录
- *
- * 实现步骤：
- *   1. 统计链表长度并打印
- *   2. 打印表头
- *   3. 遍历链表逐条打印
- *   4. 链表为空则提示"暂无数据"
- */
-void car_list_all(void) { /* TODO: 实现遍历打印全部轿车 */ }
+  printf("%-8s %-12s %-8s %-14s %-12s %10s\n", "编号", "型号", "颜色",
+         "生产厂家", "出厂日期", "价格");
+  printf("--------------------------------------------------------------\n");
+  printf("%-8s %-12s %-8s %-14s %-12s %10.2f\n", p->id, p->model, p->color,
+         p->manufacturer, p->date, p->price);
+  pause_screen();
+  return;
+}
+
+void car_list_all(void) {
+  clear_screen();
+  if (car_head == NULL) {
+    printf("暂无数据\n");
+    return;
+  }
+  printf("%-8s %-12s %-8s %-14s %-12s %10s\n", "编号", "型号", "颜色",
+         "生产厂家", "出厂日期", "价格");
+  printf("--------------------------------------------------------------\n");
+  Car *p = car_head;
+  while (p != NULL) {
+    printf("%-8s %-12s %-8s %-14s %-12s %10.2f\n", p->id, p->model, p->color,
+           p->manufacturer, p->date, p->price);
+    p = p->next;
+  }
+}
 
 /* ---- 菜单 ---- */
 
@@ -105,7 +127,47 @@ void car_list_all(void) { /* TODO: 实现遍历打印全部轿车 */ }
  *
  * 循环显示菜单，read_int 读取选择，switch 分发
  */
-void car_menu(void) { /* TODO: 实现菜单循环 */ }
+void car_menu(void) {
+  while (1) {
+    int choice = -1;
+    clear_screen();
+    printf("==========================================\n");
+    printf("             车辆信息管理系统\n");
+    printf("==========================================\n");
+    printf("   1. 添加车辆信息\n");
+    printf("   2. 删除车辆信息\n");
+    printf("   3. 修改车辆信息\n");
+    printf("   4. 查询车辆信息\n");
+    printf("   5. 显示全部车辆\n");
+    printf("   0. 返回\n");
+    printf("==========================================\n");
+    printf("请选择: ");
+
+    choice = read_int();
+    switch (choice) {
+    case 1:
+      car_add();
+      break;
+    case 2:
+      car_delete();
+      break;
+    case 3:
+      car_modify();
+      break;
+    case 4:
+      car_query();
+      break;
+    case 5:
+      car_list_all();
+      break;
+    case 0:
+      return;
+    default:
+      printf("非法输入!\n");
+      break;
+    }
+  }
+}
 
 /**
  * car_save - 保存轿车数据到文件
