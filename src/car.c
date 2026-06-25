@@ -2,6 +2,7 @@
 #include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 Car *car_head = NULL;
@@ -60,16 +61,6 @@ void car_add(void) {
   return;
 }
 
-/**
- * car_delete - 删除轿车记录
- *
- * 实现步骤：
- *   1. 读取要删除的编号
- *   2. 遍历链表找到节点（需记录前驱节点 prev）
- *   3. 打印该记录，要求用户确认 (y/n)
- *   4. 确认后从链表摘除：prev->next = p->next（头节点特殊处理）
- *   5. free 释放内存
- */
 void car_delete(void) {
   printf("需要删除的编号: ");
   char id[MAX_STR] = {0};
@@ -77,51 +68,189 @@ void car_delete(void) {
   if (id[0] == '\0') {
     printf("请输入编号\n");
     pause_screen();
+    return;
   }
-  Car *f_id = car_find(id);
-}
+  Car *p = car_head;
+  Car *prev = NULL;
 
-/**
- * car_modify - 修改轿车记录
- *
- * 实现步骤：
- *   1. 读取编号，car_find 查找
- *   2. 未找到则提示返回
- *   3. 打印当前信息
- *   4. 逐字段提示输入新值，直接回车保留原值
- *   5. 可用 safe_gets + strlen 判断是否输入了新值
- */
-void car_modify(void) { /* TODO: 实现修改轿车 */ }
-
-/**
- * car_query - 查询轿车记录（子菜单）
- *
- * 支持三种查询方式：
- *   1. 按编号查询 — 调用 car_find，精确匹配
- *   2. 按型号查询 — 遍历链表，strstr 模糊匹配
- *   3. 按价格范围查询 — 读取最低/最高价格，遍历比较 p->price
- *
- * 打印表头后逐条输出匹配记录，无结果提示"未找到"
- */
-void car_query(void) {
-  char id[MAX_STR];
-  printf("请输入查询车辆id:");
-  safe_gets(id, sizeof(id));
-  Car *p = car_find(id);
+  while (p != NULL) {
+    if (strcmp(p->id, id) == 0) {
+      break;
+    }
+    prev = p;
+    p = p->next;
+  }
   if (p == NULL) {
-    printf("\n未查询到此车辆信息\n");
+    printf("未找到此编号\n");
     pause_screen();
     return;
   }
-  printf("已查询到如下信息:\n");
 
   printf("%-10s %-14s %-8s %-14s %-16s %12s\n", "编号", "型号", "颜色",
          "生产厂家", "出厂日期", "价格");
   printf("--------------------------------------------------------------\n");
   printf("%-8s %-12s %-8s %-14s %-12s %10.2f\n", p->id, p->model, p->color,
          p->manufacturer, p->date, p->price);
+  printf("确认删除此信息吗？ (y/n): ");
+  char confirm[4] = {0};
+  safe_gets(confirm, sizeof(confirm));
+  if (confirm[0] != 'y' && confirm[0] != '\0') {
+    printf("已取消...\n");
+    pause_screen();
+    return;
+  }
+  if (prev == NULL) {
+    car_head = p->next;
+  } else {
+    prev->next = p->next;
+  }
+  free(p);
+  printf("已删除\n");
   pause_screen();
   return;
+}
+
+void car_modify(void) {
+  char id[MAX_STR] = {0};
+  printf("需要修改车辆编号: ");
+  safe_gets(id, sizeof(id));
+  if (id[0] == '\0') {
+    printf("请输入被修改车辆编号(id)\n");
+    pause_screen();
+    return;
+  }
+  Car *p = car_find(id);
+  if (p == NULL) {
+    printf("未查询到相关车辆信息\n");
+    pause_screen();
+    return;
+  }
+  printf("%-10s %-14s %-8s %-14s %-16s %12s\n", "编号", "型号", "颜色",
+         "生产厂家", "出厂日期", "价格");
+  printf("--------------------------------------------------------------\n");
+  printf("%-8s %-12s %-8s %-14s %-12s %10.2f\n", p->id, p->model, p->color,
+         p->manufacturer, p->date, p->price);
+  char buf[MAX_STR] = {0};
+
+  printf("请输入新的型号(当前: %s, 回车跳过): ", p->model);
+  safe_gets(buf, sizeof(buf));
+  if (strlen(buf) != 0) {
+    strcpy(p->model, buf);
+  }
+
+  printf("请输入新的颜色(当前: %s, 回车跳过): ", p->color);
+  safe_gets(buf, sizeof(buf));
+  if (strlen(buf) != 0) {
+    strcpy(p->color, buf);
+  }
+
+  printf("请输入新的厂家(当前: %s, 回车跳过): ", p->manufacturer);
+  safe_gets(buf, sizeof(buf));
+  if (strlen(buf) != 0) {
+    strcpy(p->manufacturer, buf);
+  }
+
+  printf("请输入新的出厂日期(当前: %s, 回车跳过): ", p->date);
+  safe_gets(buf, sizeof(buf));
+  if (strlen(buf) != 0) {
+    strcpy(p->date, buf);
+  }
+
+  printf("请输入新的价格(当前: %.2f, 回车跳过): ", p->price);
+  safe_gets(buf, sizeof(buf));
+  if (strlen(buf) != 0) {
+    p->price = atof(buf);
+  }
+
+  printf("修改成功\n");
+  pause_screen();
+}
+
+static void car_print_header(void) {
+  printf("%-10s %-14s %-8s %-14s %-16s %12s\n", "编号", "型号", "颜色",
+         "生产厂家", "出厂日期", "价格");
+  printf("--------------------------------------------------------------\n");
+}
+
+static void car_print_one(Car *p) {
+  printf("%-8s %-12s %-8s %-14s %-12s %10.2f\n", p->id, p->model, p->color,
+         p->manufacturer, p->date, p->price);
+}
+
+void car_query(void) {
+  while (1) {
+    clear_screen();
+    printf("========== 查询车辆信息 ==========\n");
+    printf("   1. 按编号查询\n");
+    printf("   2. 按型号模糊查询\n");
+    printf("   3. 按价格范围查询\n");
+    printf("   0. 返回\n");
+    printf("==================================\n");
+    printf("请选择: ");
+    int choice = read_int();
+
+    if (choice == 0)
+      return;
+
+    if (choice == 1) {
+      char id[MAX_STR];
+      printf("请输入编号: ");
+      safe_gets(id, sizeof(id));
+      Car *p = car_find(id);
+      if (p == NULL) {
+        printf("未找到\n");
+        pause_screen();
+        continue;
+      }
+      car_print_header();
+      car_print_one(p);
+      pause_screen();
+
+    } else if (choice == 2) {
+      char keyword[MAX_STR];
+      printf("请输入型号关键词: ");
+      safe_gets(keyword, sizeof(keyword));
+      int count = 0;
+      car_print_header();
+      for (Car *p = car_head; p != NULL; p = p->next) {
+        if (strcasestr(p->model, keyword) != NULL) {
+          car_print_one(p);
+          count++;
+        }
+      }
+      if (count == 0)
+        printf("未找到匹配记录\n");
+      else
+        printf("共 %d 条记录\n", count);
+      pause_screen();
+
+    } else if (choice == 3) {
+      char buf[MAX_STR];
+      printf("最低价格: ");
+      safe_gets(buf, sizeof(buf));
+      double min_price = atof(buf);
+      printf("最高价格: ");
+      safe_gets(buf, sizeof(buf));
+      double max_price = atof(buf);
+      int count = 0;
+      car_print_header();
+      for (Car *p = car_head; p != NULL; p = p->next) {
+        if (p->price >= min_price && p->price <= max_price) {
+          car_print_one(p);
+          count++;
+        }
+      }
+      if (count == 0)
+        printf("未找到匹配记录\n");
+      else
+        printf("共 %d 条记录\n", count);
+      pause_screen();
+
+    } else {
+      printf("无效选择\n");
+      pause_screen();
+    }
+  }
 }
 
 void car_list_all(void) {
@@ -186,13 +315,6 @@ void car_menu(void) {
   }
 }
 
-/**
- * car_save - 保存轿车数据到文件
- *
- * 打开 data/cars.dat（wb 模式）
- * 遍历链表，fwrite 每个节点（sizeof(Car)）
- * 注意：next 指针也会被写入，加载时需要重建
- */
 void car_save(void) {
   FILE *fp = fopen(DATA_DIR "cars.dat", "wb");
   for (Car *p = car_head; p != NULL; p = p->next)
@@ -200,12 +322,6 @@ void car_save(void) {
   fclose(fp);
 }
 
-/**
- * car_load - 从文件加载轿车数据
- *
- * 打开 data/cars.dat（rb 模式），文件不存在则跳过
- * 循环 fread 到临时变量，malloc 新节点，头插法插入链表
- */
 void car_load(void) {
   FILE *fp = fopen(DATA_DIR "cars.dat", "rb");
   if (fp == NULL)
@@ -213,6 +329,9 @@ void car_load(void) {
   Car tmp;
   while (fread(&tmp, sizeof(Car), 1, fp) == 1) {
     Car *new_node = calloc(1, sizeof(Car));
+    *new_node = tmp;
+    new_node->next = car_head;
+    car_head = new_node;
   }
   fclose(fp);
 }
