@@ -1,6 +1,7 @@
 #include "car.h"
 #include "utils.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <time.h>
 
 Car *car_head = NULL;
@@ -27,18 +28,37 @@ Car *car_find(const char *id) {
 
 /* ---- 增删改查 ---- */
 
-/**
- * car_add - 添加轿车记录
- *
- * 实现步骤：
- *   1. 清屏，打印标题
- *   2. 分配新节点 (calloc)
- *   3. 依次读取：编号、型号、颜色、生产厂家、出厂日期、价格
- *   4. 编号查重，已存在则提示并返回
- *   5. 头插法插入链表
- *   6. 提示成功，pause_screen
- */
-void car_add(void) { /* TODO: 实现添加轿车 */ }
+void car_add(void) {
+  clear_screen();
+  char buf[MAX_STR];
+  Car *new_node = calloc(1, sizeof(Car));
+  printf("编号: ");
+  safe_gets(new_node->id, sizeof(new_node->id));
+  if (car_find(new_node->id) != NULL) {
+    printf("编号已存在\n");
+    pause_screen();
+    return;
+  }
+  printf("型号: ");
+  safe_gets(new_node->model, sizeof(new_node->model));
+  printf("颜色: ");
+  safe_gets(new_node->color, sizeof(new_node->color));
+  printf("厂商: ");
+  safe_gets(new_node->manufacturer, sizeof(new_node->manufacturer));
+  printf("出厂日期(默认当日): ");
+  safe_gets(new_node->date, sizeof(new_node->date));
+  if (new_node->date[0] == '\0') {
+    get_current_date(new_node->date, sizeof(new_node->date));
+  }
+  printf("价格: ");
+  safe_gets(buf, sizeof(buf));
+  new_node->price = atof(buf);
+  new_node->next = car_head;
+  car_head = new_node;
+  printf("添加成功\n");
+  pause_screen();
+  return;
+}
 
 /**
  * car_delete - 删除轿车记录
@@ -50,7 +70,16 @@ void car_add(void) { /* TODO: 实现添加轿车 */ }
  *   4. 确认后从链表摘除：prev->next = p->next（头节点特殊处理）
  *   5. free 释放内存
  */
-void car_delete(void) { /* TODO: 实现删除轿车 */ }
+void car_delete(void) {
+  printf("需要删除的编号: ");
+  char id[MAX_STR] = {0};
+  safe_gets(id, sizeof(id));
+  if (id[0] == '\0') {
+    printf("请输入编号\n");
+    pause_screen();
+  }
+  Car *f_id = car_find(id);
+}
 
 /**
  * car_modify - 修改轿车记录
@@ -86,7 +115,7 @@ void car_query(void) {
   }
   printf("已查询到如下信息:\n");
 
-  printf("%-8s %-12s %-8s %-14s %-12s %10s\n", "编号", "型号", "颜色",
+  printf("%-10s %-14s %-8s %-14s %-16s %12s\n", "编号", "型号", "颜色",
          "生产厂家", "出厂日期", "价格");
   printf("--------------------------------------------------------------\n");
   printf("%-8s %-12s %-8s %-14s %-12s %10.2f\n", p->id, p->model, p->color,
@@ -99,9 +128,10 @@ void car_list_all(void) {
   clear_screen();
   if (car_head == NULL) {
     printf("暂无数据\n");
+    pause_screen();
     return;
   }
-  printf("%-8s %-12s %-8s %-14s %-12s %10s\n", "编号", "型号", "颜色",
+  printf("%-10s %-14s %-8s %-14s %-16s %12s\n", "编号", "型号", "颜色",
          "生产厂家", "出厂日期", "价格");
   printf("--------------------------------------------------------------\n");
   Car *p = car_head;
@@ -110,23 +140,10 @@ void car_list_all(void) {
            p->manufacturer, p->date, p->price);
     p = p->next;
   }
+  pause_screen();
 }
 
 /* ---- 菜单 ---- */
-
-/**
- * car_menu - 轿车信息管理子菜单
- *
- * 菜单项：
- *   1. 添加轿车  -> car_add
- *   2. 删除轿车  -> car_delete
- *   3. 修改轿车  -> car_modify
- *   4. 查询轿车  -> car_query
- *   5. 显示全部  -> car_list_all
- *   0. 返回主菜单 -> return
- *
- * 循环显示菜单，read_int 读取选择，switch 分发
- */
 void car_menu(void) {
   while (1) {
     int choice = -1;
