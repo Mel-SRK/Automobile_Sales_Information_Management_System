@@ -6,6 +6,7 @@
 #include <time.h>
 
 Car *car_head = NULL;
+static Car *car_tail = NULL; // 尾指针
 
 /*
  * 轿车信息模块
@@ -54,8 +55,13 @@ void car_add(void) {
   printf("价格: ");
   safe_gets(buf, sizeof(buf));
   new_node->price = atof(buf);
-  new_node->next = car_head;
-  car_head = new_node;
+  if (car_head == NULL) {
+    car_head = new_node;
+    car_tail = new_node;
+  } else {
+    car_tail->next = new_node;
+    car_tail = new_node;
+  }
   printf("添加成功\n");
   pause_screen();
   return;
@@ -330,8 +336,13 @@ void car_load(void) {
   while (fread(&tmp, sizeof(Car), 1, fp) == 1) {
     Car *new_node = calloc(1, sizeof(Car));
     *new_node = tmp;
-    new_node->next = car_head;
-    car_head = new_node;
+    if (car_head == NULL) {
+      car_head = new_node;
+      car_tail = new_node;
+    } else {
+      car_tail->next = new_node;
+      car_tail = new_node;
+    }
   }
   fclose(fp);
 }
