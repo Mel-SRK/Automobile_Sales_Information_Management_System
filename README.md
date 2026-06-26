@@ -1,6 +1,6 @@
 # 汽车销售信息管理系统
 
-C 语言课程设计项目。本仓库为**框架版本**，已完成项目结构、数据结构定义、菜单系统和全部接口规范注释，功能函数留有 `TODO` 待实现。
+C 语言课程设计项目。本仓库为**框架版本**，已完成项目结构、数据结构定义、菜单系统和全部接口规范注释。`car.c` 已完成实现，其余模块留有 `TODO` 待实现。
 
 ## 系统功能
 
@@ -52,7 +52,7 @@ cmake .. && make
 │   ├── main.c                  # 程序入口（已实现）
 │   ├── menu.c                  # 主菜单循环（已实现）
 │   ├── utils.c                 # 工具函数（已实现）
-│   ├── car.c                   # 轿车模块（TODO × 9）
+│   ├── car.c                   # 轿车模块（已实现）
 │   ├── employee.c              # 员工模块（TODO × 10）
 │   ├── customer.c              # 客户模块（TODO × 10）
 │   ├── sale.c                  # 销售模块（TODO × 9）
@@ -78,7 +78,7 @@ main.c ──> menu.c ──┬──> car.c      ──┐
 ```
 
 - 数据结构：单向链表，每个模块独立管理链表头指针
-- 存储方式：fwrite/fread 二进制逐条读写，加载时头插法重建链表
+- 存储方式：fwrite/fread 二进制逐条读写，加载时尾插法重建链表
 - 销售模块通过编号关联轿车、员工、客户，冗余存储名称字段
 
 ## 菜单结构
@@ -151,14 +151,14 @@ extern Car *car_head;
 | 函数 | 功能 | 说明 |
 |------|------|------|
 | `Car *car_find(const char *id)` | 按编号查找 | 遍历链表 strcmp，返回指针或 NULL |
-| `void car_add(void)` | 添加 | 编号查重 → 逐字段输入 → 头插法 |
+| `void car_add(void)` | 添加 | 编号查重 → 逐字段输入 → 尾插法 |
 | `void car_delete(void)` | 删除 | 查找 → 确认 → 摘链 → free |
 | `void car_modify(void)` | 修改 | 查找 → 逐字段修改，回车保留原值 |
 | `void car_query(void)` | 查询 | 子菜单：编号精确/型号模糊/价格范围 |
 | `void car_list_all(void)` | 列表 | 统计数量 → 表头 → 遍历打印 |
 | `void car_menu(void)` | 子菜单 | 循环 1-5+0 分发 |
 | `void car_save(void)` | 保存 | fwrite 到 data/cars.dat |
-| `void car_load(void)` | 加载 | fread + 头插法重建链表 |
+| `void car_load(void)` | 加载 | fread + 尾插法重建链表 |
 
 ---
 
