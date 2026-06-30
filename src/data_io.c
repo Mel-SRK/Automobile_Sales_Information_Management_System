@@ -3,7 +3,12 @@
 #include "customer.h"
 #include "employee.h"
 #include "sale.h"
-#include <stdlib.h>
+
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <sys/stat.h>
+#endif
 
 /*
  * 数据读写模块
@@ -16,8 +21,16 @@
  *   - save 前确保 data/ 目录存在
  */
 
+static void ensure_data_dir(void) {
+#ifdef _WIN32
+  _mkdir("data");
+#else
+  mkdir("data", 0755);
+#endif
+}
+
 void load_all_data(void) {
-  system("mkdir -p data/");
+  ensure_data_dir();
   car_load();
   emp_load();
   cust_load();
@@ -25,6 +38,7 @@ void load_all_data(void) {
 }
 
 void save_all_data(void) {
+  ensure_data_dir();
   car_save();
   emp_save();
   cust_save();

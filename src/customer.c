@@ -1,7 +1,8 @@
 #include "customer.h"
 
 Customer *cust_head = NULL;
-static int cust_id_counter = 1000; /* 自增编号计数器，生成 C0001, C0002... */
+static Customer *cust_tail = NULL;
+static int cust_id_counter = 0; /* 自增编号计数器，生成 C0001, C0002... */
 
 /*
  * 客户信息模块
@@ -25,8 +26,66 @@ static int cust_id_counter = 1000; /* 自增编号计数器，生成 C0001, C000
  */
 Customer *cust_find(const char *id)
 {
-    /* TODO: 遍历链表比较 id */
+    for (Customer *p = cust_head; p != NULL; p = p->next) {
+        if (strcmp(p->id, id) == 0) {
+            return p;
+        }
+    }
     return NULL;
+}
+
+static void cust_append(Customer *node)
+{
+    node->next = NULL;
+    if (cust_head == NULL) {
+        cust_head = node;
+        cust_tail = node;
+    } else {
+        cust_tail->next = node;
+        cust_tail = node;
+    }
+}
+
+static void cust_print_header(void)
+{
+    printf("%-10s %-16s %-16s %-30s\n",
+           "编号", "客户名称", "联系方式", "地址");
+    printf("--------------------------------------------------------------------------\n");
+}
+
+static void cust_print_one(const Customer *p)
+{
+    printf("%-10s %-16s %-16s %-30s\n",
+           p->id, p->name, p->phone, p->address);
+}
+
+static void cust_print_full(const Customer *p)
+{
+    printf("客户编号: %s\n", p->id);
+    printf("客户名称: %s\n", p->name);
+    printf("联系方式: %s\n", p->phone);
+    printf("地址: %s\n", p->address);
+    printf("业务联系记录: %s\n", p->contact_log[0] ? p->contact_log : "暂无");
+}
+
+static int cust_append_contact(Customer *p, const char *content)
+{
+    char date[MAX_STR] = {0};
+    char entry[MAX_LONG] = {0};
+    size_t current_len = strlen(p->contact_log);
+
+    if (content[0] == '\0') {
+        return 1;
+    }
+
+    get_current_date(date, sizeof(date));
+    snprintf(entry, sizeof(entry), "[%s] %s; ", date, content);
+    if (current_len + strlen(entry) >= sizeof(p->contact_log)) {
+        return 0;
+    }
+
+    strcat(p->contact_log, entry);
+    return 1;
 }
 
 /* ---- 增删改查 ---- */
@@ -44,7 +103,36 @@ Customer *cust_find(const char *id)
  */
 void cust_add(void)
 {
-    /* TODO: 实现添加客户 */
+    clear_screen();
+    Customer *node = calloc(1, sizeof(Customer));
+    char first_log[MAX_LONG] = {0};
+
+    if (node == NULL) {
+        printf("内存分配失败\n");
+        pause_screen();
+        return;
+    }
+
+    do {
+        snprintf(node->id, sizeof(node->id), "C%04d", ++cust_id_counter);
+    } while (cust_find(node->id) != NULL);
+
+    printf("客户编号: %s\n", node->id);
+    printf("客户名称: ");
+    safe_gets(node->name, sizeof(node->name));
+    printf("联系方式: ");
+    safe_gets(node->phone, sizeof(node->phone));
+    printf("地址: ");
+    safe_gets(node->address, sizeof(node->address));
+    printf("首次业务联系记录: ");
+    safe_gets(first_log, sizeof(first_log));
+    if (!cust_append_contact(node, first_log)) {
+        printf("联系记录过长，已跳过首次记录\n");
+    }
+
+    cust_append(node);
+    printf("添加成功\n");
+    pause_screen();
 }
 
 /**
@@ -57,7 +145,53 @@ void cust_add(void)
  */
 void cust_delete(void)
 {
-    /* TODO: 实现删除客户 */
+    char id[MAX_STR] = {0};
+    Customer *p = cust_head;
+    Customer *prev = NULL;
+
+    printf("需要删除的客户编号: ");
+    safe_gets(id, sizeof(id));
+    if (id[0] == '\0') {
+        printf("请输入客户编号\n");
+        pause_screen();
+        return;
+    }
+
+    while (p != NULL) {
+        if (strcmp(p->id, id) == 0) {
+            break;
+        }
+        prev = p;
+        p = p->next;
+    }
+    if (p == NULL) {
+        printf("未找到此客户\n");
+        pause_screen();
+        return;
+    }
+
+    cust_print_header();
+    cust_print_one(p);
+    printf("确认删除此客户吗？ (y/n): ");
+    char confirm[4] = {0};
+    safe_gets(confirm, sizeof(confirm));
+    if (confirm[0] != 'y' && confirm[0] != 'Y') {
+        printf("已取消\n");
+        pause_screen();
+        return;
+    }
+
+    if (prev == NULL) {
+        cust_head = p->next;
+    } else {
+        prev->next = p->next;
+    }
+    if (cust_tail == p) {
+        cust_tail = prev;
+    }
+    free(p);
+    printf("已删除\n");
+    pause_screen();
 }
 
 /**
@@ -71,7 +205,47 @@ void cust_delete(void)
  */
 void cust_modify(void)
 {
-    /* TODO: 实现修改客户 */
+    char id[MAX_STR] = {0};
+    char short_buf[MAX_STR] = {0};
+    char long_buf[MAX_LONG] = {0};
+
+    printf("需要修改的客户编号: ");
+    safe_gets(id, sizeof(id));
+    if (id[0] == '\0') {
+        printf("请输入客户编号\n");
+        pause_screen();
+        return;
+    }
+
+    Customer *p = cust_find(id);
+    if (p == NULL) {
+        printf("未找到此客户\n");
+        pause_screen();
+        return;
+    }
+
+    cust_print_full(p);
+
+    printf("客户名称(当前: %s，回车保留): ", p->name);
+    safe_gets(short_buf, sizeof(short_buf));
+    if (short_buf[0] != '\0') {
+        strcpy(p->name, short_buf);
+    }
+
+    printf("联系方式(当前: %s，回车保留): ", p->phone);
+    safe_gets(short_buf, sizeof(short_buf));
+    if (short_buf[0] != '\0') {
+        strcpy(p->phone, short_buf);
+    }
+
+    printf("地址(当前: %s，回车保留): ", p->address);
+    safe_gets(long_buf, sizeof(long_buf));
+    if (long_buf[0] != '\0') {
+        strcpy(p->address, long_buf);
+    }
+
+    printf("修改成功\n");
+    pause_screen();
 }
 
 /**
@@ -84,7 +258,54 @@ void cust_modify(void)
  */
 void cust_query(void)
 {
-    /* TODO: 实现查询客户 */
+    while (1) {
+        clear_screen();
+        printf("========== 查询客户信息 ==========\n");
+        printf("   1. 按编号查询\n");
+        printf("   2. 按名称模糊查询\n");
+        printf("   3. 查看完整信息\n");
+        printf("   0. 返回\n");
+        printf("==================================\n");
+        printf("请选择: ");
+        int choice = read_int();
+
+        if (choice == 0) {
+            return;
+        }
+
+        if (choice == 1 || choice == 3) {
+            char id[MAX_STR] = {0};
+            printf("请输入客户编号: ");
+            safe_gets(id, sizeof(id));
+            Customer *p = cust_find(id);
+            if (p == NULL) {
+                printf("未找到匹配记录\n");
+            } else if (choice == 1) {
+                cust_print_header();
+                cust_print_one(p);
+            } else {
+                cust_print_full(p);
+            }
+            pause_screen();
+        } else if (choice == 2) {
+            char keyword[MAX_STR] = {0};
+            int count = 0;
+            printf("请输入客户名称关键词: ");
+            safe_gets(keyword, sizeof(keyword));
+            cust_print_header();
+            for (Customer *p = cust_head; p != NULL; p = p->next) {
+                if (strstr(p->name, keyword) != NULL) {
+                    cust_print_one(p);
+                    count++;
+                }
+            }
+            printf("共 %d 条记录\n", count);
+            pause_screen();
+        } else {
+            printf("无效选择\n");
+            pause_screen();
+        }
+    }
 }
 
 /**
@@ -94,7 +315,21 @@ void cust_query(void)
  */
 void cust_list_all(void)
 {
-    /* TODO: 实现遍历打印全部客户 */
+    clear_screen();
+    if (cust_head == NULL) {
+        printf("暂无客户数据\n");
+        pause_screen();
+        return;
+    }
+
+    int count = 0;
+    cust_print_header();
+    for (Customer *p = cust_head; p != NULL; p = p->next) {
+        cust_print_one(p);
+        count++;
+    }
+    printf("共 %d 条记录\n", count);
+    pause_screen();
 }
 
 /**
@@ -109,7 +344,29 @@ void cust_list_all(void)
  */
 void cust_add_contact_log(void)
 {
-    /* TODO: 实现追加联系记录 */
+    char id[MAX_STR] = {0};
+    char content[MAX_LONG] = {0};
+
+    printf("客户编号: ");
+    safe_gets(id, sizeof(id));
+    Customer *p = cust_find(id);
+    if (p == NULL) {
+        printf("未找到此客户\n");
+        pause_screen();
+        return;
+    }
+
+    printf("当前联系记录: %s\n", p->contact_log[0] ? p->contact_log : "暂无");
+    printf("新的联系内容: ");
+    safe_gets(content, sizeof(content));
+    if (!cust_append_contact(p, content)) {
+        printf("联系记录空间不足，追加失败\n");
+        pause_screen();
+        return;
+    }
+
+    printf("追加成功\n");
+    pause_screen();
 }
 
 /* ---- 菜单 ---- */
@@ -121,7 +378,49 @@ void cust_add_contact_log(void)
  */
 void customer_menu(void)
 {
-    /* TODO: 实现菜单循环 */
+    while (1) {
+        clear_screen();
+        printf("==========================================\n");
+        printf("             客户信息管理系统\n");
+        printf("==========================================\n");
+        printf("   1. 添加客户信息\n");
+        printf("   2. 删除客户信息\n");
+        printf("   3. 修改客户信息\n");
+        printf("   4. 查询客户信息\n");
+        printf("   5. 显示全部客户\n");
+        printf("   6. 追加联系记录\n");
+        printf("   0. 返回\n");
+        printf("==========================================\n");
+        printf("请选择: ");
+
+        int choice = read_int();
+        switch (choice) {
+        case 1:
+            cust_add();
+            break;
+        case 2:
+            cust_delete();
+            break;
+        case 3:
+            cust_modify();
+            break;
+        case 4:
+            cust_query();
+            break;
+        case 5:
+            cust_list_all();
+            break;
+        case 6:
+            cust_add_contact_log();
+            break;
+        case 0:
+            return;
+        default:
+            printf("无效选择\n");
+            pause_screen();
+            break;
+        }
+    }
 }
 
 /* ---- 文件读写 ---- */
@@ -135,10 +434,41 @@ void customer_menu(void)
  */
 void cust_save(void)
 {
-    /* TODO: 实现文件保存 */
+    FILE *fp = fopen(DATA_DIR "customers.dat", "wb");
+    if (fp == NULL) {
+        printf("客户数据保存失败\n");
+        return;
+    }
+
+    for (Customer *p = cust_head; p != NULL; p = p->next) {
+        Customer tmp = *p;
+        tmp.next = NULL;
+        fwrite(&tmp, sizeof(Customer), 1, fp);
+    }
+    fclose(fp);
 }
 
 void cust_load(void)
 {
-    /* TODO: 实现文件加载 */
+    FILE *fp = fopen(DATA_DIR "customers.dat", "rb");
+    if (fp == NULL) {
+        return;
+    }
+
+    Customer tmp;
+    while (fread(&tmp, sizeof(Customer), 1, fp) == 1) {
+        Customer *node = calloc(1, sizeof(Customer));
+        if (node == NULL) {
+            break;
+        }
+        *node = tmp;
+        cust_append(node);
+        if (node->id[0] == 'C') {
+            int number = atoi(node->id + 1);
+            if (number > cust_id_counter) {
+                cust_id_counter = number;
+            }
+        }
+    }
+    fclose(fp);
 }

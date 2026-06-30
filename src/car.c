@@ -34,10 +34,16 @@ void car_add(void) {
   clear_screen();
   char buf[MAX_STR];
   Car *new_node = calloc(1, sizeof(Car));
+  if (new_node == NULL) {
+    printf("内存分配失败\n");
+    pause_screen();
+    return;
+  }
   printf("编号: ");
   safe_gets(new_node->id, sizeof(new_node->id));
   if (car_find(new_node->id) != NULL) {
     printf("编号已存在\n");
+    free(new_node);
     pause_screen();
     return;
   }
@@ -109,6 +115,9 @@ void car_delete(void) {
     car_head = p->next;
   } else {
     prev->next = p->next;
+  }
+  if (car_tail == p) {
+    car_tail = prev;
   }
   free(p);
   printf("已删除\n");
@@ -219,7 +228,7 @@ void car_query(void) {
       int count = 0;
       car_print_header();
       for (Car *p = car_head; p != NULL; p = p->next) {
-        if (strcasestr(p->model, keyword) != NULL) {
+        if (strstr(p->model, keyword) != NULL) {
           car_print_one(p);
           count++;
         }
@@ -323,8 +332,15 @@ void car_menu(void) {
 
 void car_save(void) {
   FILE *fp = fopen(DATA_DIR "cars.dat", "wb");
-  for (Car *p = car_head; p != NULL; p = p->next)
-    fwrite(p, sizeof(Car), 1, fp);
+  if (fp == NULL) {
+    printf("车辆数据保存失败\n");
+    return;
+  }
+  for (Car *p = car_head; p != NULL; p = p->next) {
+    Car tmp = *p;
+    tmp.next = NULL;
+    fwrite(&tmp, sizeof(Car), 1, fp);
+  }
   fclose(fp);
 }
 
@@ -335,7 +351,10 @@ void car_load(void) {
   Car tmp;
   while (fread(&tmp, sizeof(Car), 1, fp) == 1) {
     Car *new_node = calloc(1, sizeof(Car));
+    if (new_node == NULL)
+      break;
     *new_node = tmp;
+    new_node->next = NULL;
     if (car_head == NULL) {
       car_head = new_node;
       car_tail = new_node;

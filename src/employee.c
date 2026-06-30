@@ -1,6 +1,7 @@
 #include "employee.h"
 
 Employee *emp_head = NULL;
+static Employee *emp_tail = NULL;
 
 /*
  * 员工信息模块
@@ -23,8 +24,20 @@ Employee *emp_head = NULL;
  */
 const char *edu_to_str(Education e)
 {
-    /* TODO: 枚举转字符串 */
-    return "未知";
+    switch (e) {
+    case EDU_HIGH_SCHOOL:
+        return "高中";
+    case EDU_COLLEGE:
+        return "大专";
+    case EDU_BACHELOR:
+        return "本科";
+    case EDU_MASTER:
+        return "硕士";
+    case EDU_PHD:
+        return "博士";
+    default:
+        return "未知";
+    }
 }
 
 /* ---- 查询接口 ---- */
@@ -38,8 +51,60 @@ const char *edu_to_str(Education e)
  */
 Employee *emp_find(const char *id)
 {
-    /* TODO: 遍历链表比较 id */
+    for (Employee *p = emp_head; p != NULL; p = p->next) {
+        if (strcmp(p->id, id) == 0) {
+            return p;
+        }
+    }
     return NULL;
+}
+
+static void emp_append(Employee *node)
+{
+    node->next = NULL;
+    if (emp_head == NULL) {
+        emp_head = node;
+        emp_tail = node;
+    } else {
+        emp_tail->next = node;
+        emp_tail = node;
+    }
+}
+
+static void emp_print_header(void)
+{
+    printf("%-10s %-12s %-6s %-6s %-14s %-8s\n",
+           "编号", "姓名", "性别", "年龄", "籍贯", "学历");
+    printf("--------------------------------------------------------\n");
+}
+
+static void emp_print_one(const Employee *p)
+{
+    printf("%-10s %-12s %-6s %-6d %-14s %-8s\n",
+           p->id, p->name, p->gender, p->age, p->hometown,
+           edu_to_str(p->education));
+}
+
+static Education read_education_choice(Education current, int allow_keep)
+{
+    char buf[MAX_STR] = {0};
+    while (1) {
+        if (allow_keep) {
+            printf("学历(1-高中 2-大专 3-本科 4-硕士 5-博士，当前: %s，回车保留): ",
+                   edu_to_str(current));
+        } else {
+            printf("学历(1-高中 2-大专 3-本科 4-硕士 5-博士): ");
+        }
+        safe_gets(buf, sizeof(buf));
+        if (allow_keep && buf[0] == '\0') {
+            return current;
+        }
+        int choice = atoi(buf);
+        if (choice >= EDU_HIGH_SCHOOL && choice <= EDU_PHD) {
+            return (Education)choice;
+        }
+        printf("学历输入无效，请重新输入。\n");
+    }
 }
 
 /* ---- 增删改查 ---- */
@@ -56,7 +121,45 @@ Employee *emp_find(const char *id)
  */
 void emp_add(void)
 {
-    /* TODO: 实现添加员工 */
+    clear_screen();
+    Employee *node = calloc(1, sizeof(Employee));
+    char buf[MAX_STR] = {0};
+
+    if (node == NULL) {
+        printf("内存分配失败\n");
+        pause_screen();
+        return;
+    }
+
+    printf("员工编号: ");
+    safe_gets(node->id, sizeof(node->id));
+    if (node->id[0] == '\0') {
+        printf("员工编号不能为空\n");
+        free(node);
+        pause_screen();
+        return;
+    }
+    if (emp_find(node->id) != NULL) {
+        printf("员工编号已存在\n");
+        free(node);
+        pause_screen();
+        return;
+    }
+
+    printf("姓名: ");
+    safe_gets(node->name, sizeof(node->name));
+    printf("性别: ");
+    safe_gets(node->gender, sizeof(node->gender));
+    printf("年龄: ");
+    safe_gets(buf, sizeof(buf));
+    node->age = atoi(buf);
+    printf("籍贯: ");
+    safe_gets(node->hometown, sizeof(node->hometown));
+    node->education = read_education_choice(EDU_BACHELOR, 0);
+
+    emp_append(node);
+    printf("添加成功\n");
+    pause_screen();
 }
 
 /**
@@ -69,7 +172,53 @@ void emp_add(void)
  */
 void emp_delete(void)
 {
-    /* TODO: 实现删除员工 */
+    char id[MAX_STR] = {0};
+    Employee *p = emp_head;
+    Employee *prev = NULL;
+
+    printf("需要删除的员工编号: ");
+    safe_gets(id, sizeof(id));
+    if (id[0] == '\0') {
+        printf("请输入员工编号\n");
+        pause_screen();
+        return;
+    }
+
+    while (p != NULL) {
+        if (strcmp(p->id, id) == 0) {
+            break;
+        }
+        prev = p;
+        p = p->next;
+    }
+    if (p == NULL) {
+        printf("未找到此员工\n");
+        pause_screen();
+        return;
+    }
+
+    emp_print_header();
+    emp_print_one(p);
+    printf("确认删除此员工吗？ (y/n): ");
+    char confirm[4] = {0};
+    safe_gets(confirm, sizeof(confirm));
+    if (confirm[0] != 'y' && confirm[0] != 'Y') {
+        printf("已取消\n");
+        pause_screen();
+        return;
+    }
+
+    if (prev == NULL) {
+        emp_head = p->next;
+    } else {
+        prev->next = p->next;
+    }
+    if (emp_tail == p) {
+        emp_tail = prev;
+    }
+    free(p);
+    printf("已删除\n");
+    pause_screen();
 }
 
 /**
@@ -82,7 +231,54 @@ void emp_delete(void)
  */
 void emp_modify(void)
 {
-    /* TODO: 实现修改员工 */
+    char id[MAX_STR] = {0};
+    char buf[MAX_STR] = {0};
+
+    printf("需要修改的员工编号: ");
+    safe_gets(id, sizeof(id));
+    if (id[0] == '\0') {
+        printf("请输入员工编号\n");
+        pause_screen();
+        return;
+    }
+
+    Employee *p = emp_find(id);
+    if (p == NULL) {
+        printf("未找到此员工\n");
+        pause_screen();
+        return;
+    }
+
+    emp_print_header();
+    emp_print_one(p);
+
+    printf("姓名(当前: %s，回车保留): ", p->name);
+    safe_gets(buf, sizeof(buf));
+    if (buf[0] != '\0') {
+        strcpy(p->name, buf);
+    }
+
+    printf("性别(当前: %s，回车保留): ", p->gender);
+    safe_gets(buf, sizeof(buf));
+    if (buf[0] != '\0') {
+        strcpy(p->gender, buf);
+    }
+
+    printf("年龄(当前: %d，回车保留): ", p->age);
+    safe_gets(buf, sizeof(buf));
+    if (buf[0] != '\0') {
+        p->age = atoi(buf);
+    }
+
+    printf("籍贯(当前: %s，回车保留): ", p->hometown);
+    safe_gets(buf, sizeof(buf));
+    if (buf[0] != '\0') {
+        strcpy(p->hometown, buf);
+    }
+
+    p->education = read_education_choice(p->education, 1);
+    printf("修改成功\n");
+    pause_screen();
 }
 
 /**
@@ -95,7 +291,64 @@ void emp_modify(void)
  */
 void emp_query(void)
 {
-    /* TODO: 实现查询员工 */
+    while (1) {
+        clear_screen();
+        printf("========== 查询员工信息 ==========\n");
+        printf("   1. 按编号查询\n");
+        printf("   2. 按姓名模糊查询\n");
+        printf("   3. 按学历筛选\n");
+        printf("   0. 返回\n");
+        printf("==================================\n");
+        printf("请选择: ");
+        int choice = read_int();
+
+        if (choice == 0) {
+            return;
+        }
+
+        if (choice == 1) {
+            char id[MAX_STR] = {0};
+            printf("请输入员工编号: ");
+            safe_gets(id, sizeof(id));
+            Employee *p = emp_find(id);
+            if (p == NULL) {
+                printf("未找到匹配记录\n");
+            } else {
+                emp_print_header();
+                emp_print_one(p);
+            }
+            pause_screen();
+        } else if (choice == 2) {
+            char keyword[MAX_STR] = {0};
+            int count = 0;
+            printf("请输入姓名关键词: ");
+            safe_gets(keyword, sizeof(keyword));
+            emp_print_header();
+            for (Employee *p = emp_head; p != NULL; p = p->next) {
+                if (strstr(p->name, keyword) != NULL) {
+                    emp_print_one(p);
+                    count++;
+                }
+            }
+            printf("共 %d 条记录\n", count);
+            pause_screen();
+        } else if (choice == 3) {
+            Education edu = read_education_choice(EDU_BACHELOR, 0);
+            int count = 0;
+            emp_print_header();
+            for (Employee *p = emp_head; p != NULL; p = p->next) {
+                if (p->education == edu) {
+                    emp_print_one(p);
+                    count++;
+                }
+            }
+            printf("共 %d 条记录\n", count);
+            pause_screen();
+        } else {
+            printf("无效选择\n");
+            pause_screen();
+        }
+    }
 }
 
 /**
@@ -105,7 +358,21 @@ void emp_query(void)
  */
 void emp_list_all(void)
 {
-    /* TODO: 实现遍历打印全部员工 */
+    clear_screen();
+    if (emp_head == NULL) {
+        printf("暂无员工数据\n");
+        pause_screen();
+        return;
+    }
+
+    int count = 0;
+    emp_print_header();
+    for (Employee *p = emp_head; p != NULL; p = p->next) {
+        emp_print_one(p);
+        count++;
+    }
+    printf("共 %d 条记录\n", count);
+    pause_screen();
 }
 
 /* ---- 菜单 ---- */
@@ -117,7 +384,45 @@ void emp_list_all(void)
  */
 void employee_menu(void)
 {
-    /* TODO: 实现菜单循环 */
+    while (1) {
+        clear_screen();
+        printf("==========================================\n");
+        printf("             员工信息管理系统\n");
+        printf("==========================================\n");
+        printf("   1. 添加员工信息\n");
+        printf("   2. 删除员工信息\n");
+        printf("   3. 修改员工信息\n");
+        printf("   4. 查询员工信息\n");
+        printf("   5. 显示全部员工\n");
+        printf("   0. 返回\n");
+        printf("==========================================\n");
+        printf("请选择: ");
+
+        int choice = read_int();
+        switch (choice) {
+        case 1:
+            emp_add();
+            break;
+        case 2:
+            emp_delete();
+            break;
+        case 3:
+            emp_modify();
+            break;
+        case 4:
+            emp_query();
+            break;
+        case 5:
+            emp_list_all();
+            break;
+        case 0:
+            return;
+        default:
+            printf("无效选择\n");
+            pause_screen();
+            break;
+        }
+    }
 }
 
 /* ---- 文件读写 ---- */
@@ -128,10 +433,35 @@ void employee_menu(void)
  */
 void emp_save(void)
 {
-    /* TODO: 实现文件保存 */
+    FILE *fp = fopen(DATA_DIR "employees.dat", "wb");
+    if (fp == NULL) {
+        printf("员工数据保存失败\n");
+        return;
+    }
+
+    for (Employee *p = emp_head; p != NULL; p = p->next) {
+        Employee tmp = *p;
+        tmp.next = NULL;
+        fwrite(&tmp, sizeof(Employee), 1, fp);
+    }
+    fclose(fp);
 }
 
 void emp_load(void)
 {
-    /* TODO: 实现文件加载 */
+    FILE *fp = fopen(DATA_DIR "employees.dat", "rb");
+    if (fp == NULL) {
+        return;
+    }
+
+    Employee tmp;
+    while (fread(&tmp, sizeof(Employee), 1, fp) == 1) {
+        Employee *node = calloc(1, sizeof(Employee));
+        if (node == NULL) {
+            break;
+        }
+        *node = tmp;
+        emp_append(node);
+    }
+    fclose(fp);
 }

@@ -19,8 +19,13 @@ void safe_gets(char *buf, int size) {
         return;
     }
     size_t len = strlen(buf);
-    if (len > 0 && buf[len - 1] == '\n')
+    if (len > 0 && buf[len - 1] == '\n') {
         buf[len - 1] = '\0';
+    } else {
+        int ch;
+        while ((ch = getchar()) != '\n' && ch != EOF) {
+        }
+    }
 }
 
 int read_int(void) {
