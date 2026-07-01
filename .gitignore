@@ -1,0 +1,16 @@
+# CMake 构建目录
+build/
+cmake-build-*/
+
+# 编译产物
+*.o
+*.out
+auto_sales
+
+# IDE 配置
+.vscode/
+.idea/
+compile_commands.json
+
+# 运行时数据（可选，看你们需不需要提交示例数据）
+# data/*.dat

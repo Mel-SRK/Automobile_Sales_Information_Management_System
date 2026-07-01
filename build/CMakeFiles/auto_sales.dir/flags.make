@@ -6,5 +6,5 @@ C_DEFINES =
 
 C_INCLUDES = -I/home/srk/Git_Program/Automobile_Sales_Information_Management_System/include
 
-C_FLAGS = -g -std=gnu11
+C_FLAGS = -std=gnu11
 

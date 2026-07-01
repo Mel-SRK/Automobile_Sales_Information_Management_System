@@ -1,49 +1,49 @@
 [
 {
   "directory": "/home/srk/Git_Program/Automobile_Sales_Information_Management_System/build",
-  "command": "/usr/bin/cc  -I/home/srk/Git_Program/Automobile_Sales_Information_Management_System/include -g -std=gnu11 -o CMakeFiles/auto_sales.dir/src/car.c.o -c /home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/car.c",
+  "command": "/usr/bin/cc  -I/home/srk/Git_Program/Automobile_Sales_Information_Management_System/include -std=gnu11 -o CMakeFiles/auto_sales.dir/src/car.c.o -c /home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/car.c",
   "file": "/home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/car.c",
   "output": "CMakeFiles/auto_sales.dir/src/car.c.o"
 },
 {
   "directory": "/home/srk/Git_Program/Automobile_Sales_Information_Management_System/build",
-  "command": "/usr/bin/cc  -I/home/srk/Git_Program/Automobile_Sales_Information_Management_System/include -g -std=gnu11 -o CMakeFiles/auto_sales.dir/src/customer.c.o -c /home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/customer.c",
+  "command": "/usr/bin/cc  -I/home/srk/Git_Program/Automobile_Sales_Information_Management_System/include -std=gnu11 -o CMakeFiles/auto_sales.dir/src/customer.c.o -c /home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/customer.c",
   "file": "/home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/customer.c",
   "output": "CMakeFiles/auto_sales.dir/src/customer.c.o"
 },
 {
   "directory": "/home/srk/Git_Program/Automobile_Sales_Information_Management_System/build",
-  "command": "/usr/bin/cc  -I/home/srk/Git_Program/Automobile_Sales_Information_Management_System/include -g -std=gnu11 -o CMakeFiles/auto_sales.dir/src/data_io.c.o -c /home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/data_io.c",
+  "command": "/usr/bin/cc  -I/home/srk/Git_Program/Automobile_Sales_Information_Management_System/include -std=gnu11 -o CMakeFiles/auto_sales.dir/src/data_io.c.o -c /home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/data_io.c",
   "file": "/home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/data_io.c",
   "output": "CMakeFiles/auto_sales.dir/src/data_io.c.o"
 },
 {
   "directory": "/home/srk/Git_Program/Automobile_Sales_Information_Management_System/build",
-  "command": "/usr/bin/cc  -I/home/srk/Git_Program/Automobile_Sales_Information_Management_System/include -g -std=gnu11 -o CMakeFiles/auto_sales.dir/src/employee.c.o -c /home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/employee.c",
+  "command": "/usr/bin/cc  -I/home/srk/Git_Program/Automobile_Sales_Information_Management_System/include -std=gnu11 -o CMakeFiles/auto_sales.dir/src/employee.c.o -c /home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/employee.c",
   "file": "/home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/employee.c",
   "output": "CMakeFiles/auto_sales.dir/src/employee.c.o"
 },
 {
   "directory": "/home/srk/Git_Program/Automobile_Sales_Information_Management_System/build",
-  "command": "/usr/bin/cc  -I/home/srk/Git_Program/Automobile_Sales_Information_Management_System/include -g -std=gnu11 -o CMakeFiles/auto_sales.dir/src/main.c.o -c /home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/main.c",
+  "command": "/usr/bin/cc  -I/home/srk/Git_Program/Automobile_Sales_Information_Management_System/include -std=gnu11 -o CMakeFiles/auto_sales.dir/src/main.c.o -c /home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/main.c",
   "file": "/home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/main.c",
   "output": "CMakeFiles/auto_sales.dir/src/main.c.o"
 },
 {
   "directory": "/home/srk/Git_Program/Automobile_Sales_Information_Management_System/build",
-  "command": "/usr/bin/cc  -I/home/srk/Git_Program/Automobile_Sales_Information_Management_System/include -g -std=gnu11 -o CMakeFiles/auto_sales.dir/src/menu.c.o -c /home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/menu.c",
+  "command": "/usr/bin/cc  -I/home/srk/Git_Program/Automobile_Sales_Information_Management_System/include -std=gnu11 -o CMakeFiles/auto_sales.dir/src/menu.c.o -c /home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/menu.c",
   "file": "/home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/menu.c",
   "output": "CMakeFiles/auto_sales.dir/src/menu.c.o"
 },
 {
   "directory": "/home/srk/Git_Program/Automobile_Sales_Information_Management_System/build",
-  "command": "/usr/bin/cc  -I/home/srk/Git_Program/Automobile_Sales_Information_Management_System/include -g -std=gnu11 -o CMakeFiles/auto_sales.dir/src/sale.c.o -c /home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/sale.c",
+  "command": "/usr/bin/cc  -I/home/srk/Git_Program/Automobile_Sales_Information_Management_System/include -std=gnu11 -o CMakeFiles/auto_sales.dir/src/sale.c.o -c /home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/sale.c",
   "file": "/home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/sale.c",
   "output": "CMakeFiles/auto_sales.dir/src/sale.c.o"
 },
 {
   "directory": "/home/srk/Git_Program/Automobile_Sales_Information_Management_System/build",
-  "command": "/usr/bin/cc  -I/home/srk/Git_Program/Automobile_Sales_Information_Management_System/include -g -std=gnu11 -o CMakeFiles/auto_sales.dir/src/utils.c.o -c /home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/utils.c",
+  "command": "/usr/bin/cc  -I/home/srk/Git_Program/Automobile_Sales_Information_Management_System/include -std=gnu11 -o CMakeFiles/auto_sales.dir/src/utils.c.o -c /home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/utils.c",
   "file": "/home/srk/Git_Program/Automobile_Sales_Information_Management_System/src/utils.c",
   "output": "CMakeFiles/auto_sales.dir/src/utils.c.o"
 }
